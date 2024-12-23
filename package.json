@@ -14,5 +14,9 @@
   },
   "dependencies": {
     "mongodb": "^6.12.0"
+  },
+  "scripts": {
+    "test": "npx jest -b",
+    "coverage": "npx jest test --coverage --watchAll=false"
   }
 }
