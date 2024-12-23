@@ -27,6 +27,10 @@ jobs:
       - name: Build TypeScript code
         run: npm run build
 
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Run tests
         run: npm test
 
