@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: ./src/auth/Dockerfile
+      args:
+        - TS_CONFIG_PATH=./tsconfig.json
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./tsconfig.json:/app/tsconfig.json
+    networks:
+      - app-network
+
+  api:
+    build:
+      context: .
+      dockerfile: ./src/api/Dockerfile
+      args:
+         - TS_CONFIG_PATH=./tsconfig.json
+    ports:
+      - "3030:3030"
+    environment:
+      - PORT=3030
+      - MONGO_DB_URI=mongodb+srv://nikodem:vd3QiZ1VZx9s7Hau@movie-service.ypgwz.mongodb.net/?retryWrites=true&w=majority&appName=movie-service;
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - OMDB_API_URL=http://www.omdbapi.com
+      - JWT_SECRET=${JWT_SECRET}
+      - AUTH_API_URL=http://auth:8080
+    volumes:
+      - ./tsconfig.json:/app/tsconfig.json
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "node /app/index.js",
+    "build": "tsc",
+    "test": "npx jest -b",
+    "coverage": "npx jest test --coverage --watchAll=false"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7"
+  }
+}
