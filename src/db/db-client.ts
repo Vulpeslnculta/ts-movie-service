@@ -36,6 +36,13 @@ export class MongoDBClient {
     return this.db.collection('users').find().toArray() as unknown as Promise<User[]>;
   }
 
+  async getUserById(id: string): Promise<User> {
+    if (!this.db) {
+      throw new Error('Not connected to db');
+    }
+    return this.db.collection('users').findOne({ _id: new ObjectId(id) }) as unknown as Promise<User>;
+  }
+
   async getUserByLogin(login: string): Promise<User> {
     if (!this.db) {
       throw new Error('Not connected to db');
@@ -52,14 +59,14 @@ export class MongoDBClient {
     return this.db.collection('users').insertOne(user);
   }
 
-  async deleteUser(id: ObjectId) {
+  async deleteUser(id: string) {
     if (!this.db) {
       throw new Error('Not connected to db');
     }
     return this.db.collection('users').deleteOne({ _id: new ObjectId(id) });
   }
 
-  async updateUser(id: ObjectId, user: User) {
+  async updateUser(id: string, user: User) {
     if (!this.db) {
       throw new Error('Not connected to db');
     }
@@ -82,7 +89,7 @@ export class MongoDBClient {
     return this.db.collection('movies').find({}, { projection: { title: 1, _id: 1 } }).toArray() as unknown as Promise<DbMovie[]>;
   }
 
-  async getMovieById(id: ObjectId) {
+  async getMovieById(id: string) {
     if (!this.db) {
       throw new Error('Not connected to db');
     }
@@ -104,14 +111,14 @@ export class MongoDBClient {
     return this.db.collection('movies').insertOne(movie);
   }
 
-  async updateMovie(id: ObjectId, movie: DbMovie) {
+  async updateMovie(id: string, movie: DbMovie) {
     if (!this.db) {
       throw new Error('Not connected to db');
     }
     return this.db.collection('movies').updateOne({ _id: new ObjectId(id) }, { $set: movie });
   }
 
-  async deleteMovie(id: ObjectId) {
+  async deleteMovie(id: string) {
     if (!this.db) {
       throw new Error('Not connected to db');
     }

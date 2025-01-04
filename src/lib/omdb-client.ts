@@ -14,13 +14,16 @@ export class OMDBClient {
   }
 
   prepareParams(params: OMDBParams) {
-    // Add api key
     this.queryParams.append('apikey', this.apiKey);
     for (const [key, value] of Object.entries(params)) {
       if (value) {
         try {
           const formattedKey = OMDBQueryParams[key as keyof typeof OMDBQueryParams];
-          this.queryParams.append(formattedKey, value.toString());
+          if (formattedKey) {
+            this.queryParams.append(formattedKey, value.toString());
+          } else {
+            console.error(`Invalid query param: ${key}`);
+          }
         } catch (e) {
           console.error(`Error: ${e}`);
           console.error(`Invalid query param: ${key}`);
@@ -51,10 +54,3 @@ export class OMDBClient {
     });
   }
 }
-
-// TEST
-// import { OMDBMediaTypes } from './types';
-// const omdbClient = new OMDBClient();
-// (async () => {
-//   console.log(await omdbClient.getMovie({ title: 'batman', type: OMDBMediaTypes.movie }));
-// })()

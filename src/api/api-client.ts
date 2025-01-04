@@ -1,8 +1,7 @@
 import http from 'http';
 import * as endpoint from './endpoints';
 import { HttpMethod } from './types';
-import { validateToken } from '@lib/decorators';
-
+import { validateToken, log, userViewPermissions } from '@lib/decorators';
 
 export class ApiClient {
 
@@ -37,8 +36,11 @@ export class ApiClient {
     }
   }
 
+  @log
   @validateToken
-  handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+  @userViewPermissions
+
+  async handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
     console.log('Request URL:', req.url);
     // #region constants
     const url = new URL(req.url!, `http://${req.headers.host}`);

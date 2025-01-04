@@ -1,6 +1,5 @@
 import { stringToHash } from '@lib/utils';
 import { MongoDBClient } from '@db/db-client';
-import { JWTClient } from '@auth/lib/jwt-client';
 import { v4 } from 'uuid';
 import http from 'http';
 export async function login(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -36,8 +35,26 @@ export async function login(req: http.IncomingMessage, res: http.ServerResponse)
         }
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        const jwtClient = new JWTClient();
-        jwtClient.issueToken(req, res, user._id!.toString());
+        const authReq = http.request({
+          hostname: 'auth',
+          port: 8080,
+          path: '/issue-token',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }, (authRes) => {
+          let data = '';
+          authRes.on('data', (chunk) => {
+            data += chunk;
+          });
+          authRes.on('end', () => {
+            res.end(data);
+          });
+        }
+        )
+        authReq.write(JSON.stringify({ userId: user._id }));
+        authReq.end();
       } catch (error) {
         console.error(`Error while login: ${error}`);
         res.statusCode = 400;
@@ -65,7 +82,15 @@ export async function register(req: http.IncomingMessage, res: http.ServerRespon
           res.end("User already exists");
           return;
         }
-        await dbClient.addUser({ login, password: hashedPassword, id: v4(), email, isPremium: false });
+        await dbClient.addUser(
+          {
+            login: login.toLowerCase(),
+            password: hashedPassword,
+            id: v4(),
+            email: email.toLowerCase(),
+            isPremium: false
+          }
+        );
       } catch (error) {
         console.error(`Error while register: ${error}`);
         res.statusCode = 400;
@@ -95,7 +120,7 @@ export async function changePremium(req: http.IncomingMessage, res: http.ServerR
         }
         user.isPremium = isPremium === 'true' ? true : false;
         console.log(`user before update: ${JSON.stringify(user)}`);
-        await dbClient.updateUser(user._id!, user);
+        await dbClient.updateUser(user._id!.toHexString(), user);
       } catch (error) {
         console.error(`Error while changePremium: ${error}`);
         res.statusCode = 400;
@@ -123,7 +148,7 @@ export async function deleteUser(req: http.IncomingMessage, res: http.ServerResp
           res.end("User not found");
           return;
         }
-        await dbClient.deleteUser(user._id!);
+        await dbClient.deleteUser(user._id!.toHexString());
       } catch (error) {
         console.error(`Error while deleteUser: ${error}`);
         res.statusCode = 400;

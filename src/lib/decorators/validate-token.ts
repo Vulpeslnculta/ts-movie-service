@@ -1,12 +1,11 @@
 import * as http from 'http';
 import { URL } from 'url';
-import { getFromEnv } from './utils';
+import { getFromEnv } from '../utils';
 
-
-const authApiUrl = getFromEnv("AUTH_API_URL") || 'http://localhost:8080';
 
 //eslint-disable-next-line
 export function validateToken(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  const authApiUrl = getFromEnv("AUTH_API_URL");
   const originalMethod = descriptor.value;
 
   //eslint-disable-next-line
@@ -22,6 +21,7 @@ export function validateToken(target: any, propertyKey: string, descriptor: Prop
       const token = bearer[1];
 
       // Call auth API to validate token
+      console.log(authApiUrl);
       const options = {
         hostname: new URL(authApiUrl).hostname,
         port: new URL(authApiUrl).port,
@@ -34,7 +34,8 @@ export function validateToken(target: any, propertyKey: string, descriptor: Prop
       };
 
       const authReq = http.request(options, (authRes) => {
-        //eslint-disable-next-line
+        console.log(`Auth API response: ${authRes.statusCode}`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         let data = '';
         authRes.on('data', (chunk) => {
           data += chunk;
@@ -46,15 +47,16 @@ export function validateToken(target: any, propertyKey: string, descriptor: Prop
           } else {
             res.statusCode = 401;
             res.end("Unauthorized");
+            return;
           }
         });
       });
-
 
       authReq.on('error', (e) => {
         console.error(`Error while validating token: ${e}`);
         res.statusCode = 500;
         res.end("Internal Server Error");
+        return;
       });
 
       authReq.write(JSON.stringify({ token }));
@@ -62,6 +64,7 @@ export function validateToken(target: any, propertyKey: string, descriptor: Prop
     } else {
       res.statusCode = 403;
       res.end("Forbidden");
+      return;
     }
   };
 

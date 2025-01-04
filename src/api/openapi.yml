@@ -1,0 +1,77 @@
+openapi: 3.1.0
+info:
+  title: Movie Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:{port}
+    variables:
+      port:
+        default: "4040"
+paths:
+  /movies:
+    get:
+      summary: Get all movies
+      operationId: getMovies
+      responses:
+        "200":
+          description: A list of movies
+    post:
+      summary: Add a new movie
+      operationId: addMovie
+      responses:
+        "201":
+          description: Movie added successfully
+    put:
+      summary: Update a movie
+      operationId: updateMovie
+      responses:
+        "200":
+          description: Movie updated successfully
+    delete:
+      summary: Delete a movie
+      operationId: deleteMovie
+      responses:
+        "200":
+          description: Movie deleted successfully
+  /movie:
+    get:
+      summary: Get a specific movie
+      operationId: getMovie
+      responses:
+        "200":
+          description: Movie details
+  /auth/login:
+    post:
+      summary: User login
+      operationId: login
+      responses:
+        "200":
+          description: User logged in successfully
+  /auth/register:
+    post:
+      summary: User registration
+      operationId: register
+      responses:
+        "201":
+          description: User registered successfully
+  /auth/changePremium:
+    post:
+      summary: Change user premium status
+      operationId: changePremium
+      responses:
+        "200":
+          description: User premium status changed successfully
+  /auth/deleteUser:
+    post:
+      summary: Delete a user
+      operationId: deleteUser
+      responses:
+        "200":
+          description: User deleted successfully
+  /auth/allusers:
+    get:
+      summary: Get all users
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: A list of users

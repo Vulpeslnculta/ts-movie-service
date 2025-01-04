@@ -18,28 +18,40 @@ export const getMovies = async (req: http.IncomingMessage, res: http.ServerRespo
   } catch (error) {
     console.error(error);
     res.statusCode = 500;
+    console.log(res.statusCode);
     res.end("Internal Server Error");
   }
 }
 
 export async function addMovie(req: http.IncomingMessage, res: http.ServerResponse) {
+  console.log('addMovie');
   try {
+    console.log('in handler');
     const dbClient = new MongoDBClient("movies");
     await dbClient.connect();
-    let movie: DbMovie;
-    req.on('data', async (data) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+      console.log('data getting');
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
       try {
-        movie = JSON.parse(data.toString());
+        const movie: DbMovie = JSON.parse(body);
+        console.log('movie:', movie);
         if (movie) {
           await dbClient.addMovie(movie);
+          console.log('movie added');
+          console.log(`Movie ${movie.title} added`);
+          res.statusCode = 201;
+          res.end(`Movie ${movie.title} added`);
         }
       } catch (error) {
         console.error(`Error while postMovies: ${error}`);
         res.statusCode = 400;
         res.end("Bad Request");
       }
-      res.statusCode = 201;
-      res.end(`Movie ${movie.title} added`);
     });
   } catch (error) {
     console.error(error);
@@ -58,7 +70,7 @@ export async function deleteMovies(req: http.IncomingMessage, res: http.ServerRe
         if (movieToDelete) {
           const movie = await dbClient.getMovieByTitle(movieToDelete.title);
           if (movie) {
-            await dbClient.deleteMovie(movie._id);
+            await dbClient.deleteMovie(movie._id.toHexString());
           }
         }
 
@@ -88,7 +100,7 @@ export async function updateMovie(req: http.IncomingMessage, res: http.ServerRes
         if (movieToUpdate) {
           const movie = await dbClient.getMovieByTitle(movieToUpdate.title);
           if (movie) {
-            await dbClient.updateMovie(movie._id, movieToUpdate.update as DbMovie);
+            await dbClient.updateMovie(movie._id.toHexString(), movieToUpdate.update as DbMovie);
           }
         }
       } catch (error) {
@@ -117,7 +129,7 @@ export async function deleteMovie(req: http.IncomingMessage, res: http.ServerRes
         if (movieToDelete) {
           const movie = await dbClient.getMovieByTitle(movieToDelete.title);
           if (movie) {
-            await dbClient.deleteMovie(movie._id);
+            await dbClient.deleteMovie(movie._id.toHexString());
           }
         }
 

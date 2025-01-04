@@ -21,4 +21,5 @@ export type User = {
   email: string;
   password: string;
   isPremium: boolean;
+  requestTimestamps?: Array<number>;
 }

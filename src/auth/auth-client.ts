@@ -1,6 +1,7 @@
 import * as http from 'http';
 import { JWTClient } from './lib/jwt-client';
 import { RequestWithToken } from './types';
+import { log } from '@lib/decorators/log';
 
 export class AuthClient {
   port: string;
@@ -20,8 +21,8 @@ export class AuthClient {
     });
   }
 
+  @log
   handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
-    console.log('Request URL:', req.url);
     if (req.method === 'POST' && req.url === '/validate-token') {
       let body = '';
 

@@ -1,4 +1,7 @@
+import { ObjectId } from "mongodb/mongodb";
+
 export type DbMovie = {
+  _id?: ObjectId;
   id: string;
   title: string;
   year: string;
