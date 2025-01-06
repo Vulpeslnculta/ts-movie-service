@@ -34,6 +34,7 @@ export const getMovie = async (req: http.IncomingMessage, res: http.ServerRespon
       const omdbMovie = await omdbClient.getMovie({ title });
       const formattedMovie = formatMovie(omdbMovie);
       await dbClient.addMovie(formattedMovie);
+      dbClient.disconnect();
       console.log(`movie: ${JSON.stringify(formattedMovie)} added to db`);
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');

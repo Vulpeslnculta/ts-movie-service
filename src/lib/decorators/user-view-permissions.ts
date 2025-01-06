@@ -35,12 +35,14 @@ export function userViewPermissions(target: unknown, propertyKey: string, descri
           const throttlingTime = 1000 * 5 // 5 seconds
           const ttl = 1000 * 60 * 60 * 24 * 30; // 30 days
           if (newestTimestamp > currentTimestamp - throttlingTime) {
+            await dbClient.disconnect();
             res.statusCode = 429;
             res.end(`Too many requests. Please wait ${throttlingTime / 1000} seconds`);
             return;
           } else
             if (!user.isPremium && user.requestTimestamps.length >= 5 && oldestTimestamp > currentTimestamp - ttl) {
               const oldestDate = new Date(oldestTimestamp);
+              await dbClient.disconnect();
               res.statusCode = 403;
               res.end(`You have reached your monthly quota. Please come back on ${oldestDate.toDateString()}`);
               return;
@@ -54,6 +56,7 @@ export function userViewPermissions(target: unknown, propertyKey: string, descri
         user.requestTimestamps!.push(Date.now());
 
         await dbClient.updateUser(userId, user);
+        await dbClient.disconnect();
         return await originalMethod.apply(this, [req, res, ...args]);
       } else {
         return await originalMethod.apply(this, [req, res, ...args]);

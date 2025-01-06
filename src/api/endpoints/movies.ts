@@ -14,6 +14,7 @@ export const getMovies = async (req: http.IncomingMessage, res: http.ServerRespo
         movies = await dbClient.getTitles();
       }
     }
+    await dbClient.disconnect();
     res.end(JSON.stringify(movies));
   } catch (error) {
     console.error(error);
@@ -44,6 +45,7 @@ export async function addMovie(req: http.IncomingMessage, res: http.ServerRespon
           await dbClient.addMovie(movie);
           console.log('movie added');
           console.log(`Movie ${movie.title} added`);
+          await dbClient.disconnect();
           res.statusCode = 201;
           res.end(`Movie ${movie.title} added`);
         }
@@ -51,6 +53,7 @@ export async function addMovie(req: http.IncomingMessage, res: http.ServerRespon
         console.error(`Error while postMovies: ${error}`);
         res.statusCode = 400;
         res.end("Bad Request");
+        await dbClient.disconnect();
       }
     });
   } catch (error) {
@@ -76,9 +79,11 @@ export async function deleteMovies(req: http.IncomingMessage, res: http.ServerRe
 
       } catch (error) {
         console.error(`Error while deleteMovies: ${error}`);
+        await dbClient.disconnect();
         res.statusCode = 400;
         res.end("Bad Request");
       }
+      await dbClient.disconnect();
       res.statusCode = 200;
       res.end(`Movie ${movieToDelete.title} deleted`);
     });
@@ -105,9 +110,11 @@ export async function updateMovie(req: http.IncomingMessage, res: http.ServerRes
         }
       } catch (error) {
         console.error(`Error while updateMovie: ${error}`);
+        await dbClient.disconnect();
         res.statusCode = 400;
         res.end("Bad Request");
       }
+      await dbClient.disconnect();
       res.statusCode = 200;
       res.end(`Movie ${movieToUpdate.title} updated`);
     });
@@ -135,9 +142,11 @@ export async function deleteMovie(req: http.IncomingMessage, res: http.ServerRes
 
       } catch (error) {
         console.error(`Error while deleteMovie: ${error}`);
+        await dbClient.disconnect();
         res.statusCode = 400;
         res.end("Bad Request");
       }
+      await dbClient.disconnect();
       res.statusCode = 200;
       res.end(`Movie ${movieToDelete.title} deleted`);
     });

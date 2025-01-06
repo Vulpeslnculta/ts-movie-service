@@ -16,6 +16,7 @@ export async function login(req: http.IncomingMessage, res: http.ServerResponse)
       try {
         const { login, password } = JSON.parse(body);
         if (!login || !password) {
+          await dbClient.disconnect();
           res.statusCode = 400;
           res.end("Bad Request");
           return;
@@ -24,15 +25,18 @@ export async function login(req: http.IncomingMessage, res: http.ServerResponse)
         const user = await dbClient.getUserByLogin(login);
         console.log(user);
         if (!user) {
+          await dbClient.disconnect();
           res.statusCode = 404;
           res.end("User not found, check your login or register");
           return;
         }
         if (user.password !== hashedPassword) {
+          await dbClient.disconnect();
           res.statusCode = 401;
           res.end("Unauthorized");
           return;
         }
+        await dbClient.disconnect();
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         const authReq = http.request({
@@ -78,6 +82,7 @@ export async function register(req: http.IncomingMessage, res: http.ServerRespon
         const hashedPassword = stringToHash(password);
         const user = await dbClient.getUserByLogin(login);
         if (user) {
+          await dbClient.disconnect();
           res.statusCode = 409;
           res.end("User already exists");
           return;
@@ -92,10 +97,13 @@ export async function register(req: http.IncomingMessage, res: http.ServerRespon
           }
         );
       } catch (error) {
+        await dbClient.disconnect();
         console.error(`Error while register: ${error}`);
         res.statusCode = 400;
         res.end("Bad Request");
       }
+      await dbClient.disconnect();
+      res.statusCode = 201;
       res.end("User created");
     });
   } catch (error) {
@@ -114,6 +122,7 @@ export async function changePremium(req: http.IncomingMessage, res: http.ServerR
         const { login, isPremium } = JSON.parse(data.toString());
         const user = await dbClient.getUserByLogin(login);
         if (!user) {
+          await dbClient.disconnect();
           res.statusCode = 404;
           res.end("User not found");
           return;
@@ -123,11 +132,13 @@ export async function changePremium(req: http.IncomingMessage, res: http.ServerR
         await dbClient.updateUser(user._id!.toHexString(), user);
       } catch (error) {
         console.error(`Error while changePremium: ${error}`);
+        await dbClient.disconnect();
         res.statusCode = 400;
         res.end("Bad Request");
       }
       console.log('Data:', data.toString());
-      res.end('Hello, World!');
+      await dbClient.disconnect();
+      res.end('User premium status changed');
     });
   } catch (error) {
     console.error(error);
@@ -144,6 +155,7 @@ export async function deleteUser(req: http.IncomingMessage, res: http.ServerResp
         const { login } = JSON.parse(data.toString());
         const user = await dbClient.getUserByLogin(login);
         if (!user) {
+          await dbClient.disconnect();
           res.statusCode = 404;
           res.end("User not found");
           return;
@@ -151,10 +163,12 @@ export async function deleteUser(req: http.IncomingMessage, res: http.ServerResp
         await dbClient.deleteUser(user._id!.toHexString());
       } catch (error) {
         console.error(`Error while deleteUser: ${error}`);
+        await dbClient.disconnect();
         res.statusCode = 400;
         res.end("Bad Request");
       }
-      res.end('Hello, World!');
+      await dbClient.disconnect();
+      res.end('User deleted');
     });
   } catch (error) {
     console.error(error);
@@ -168,6 +182,7 @@ export async function getAllUsers(req: http.IncomingMessage, res: http.ServerRes
     const dbClient = new MongoDBClient("users");
     await dbClient.connect();
     const users = await dbClient.getUsers();
+    await dbClient.disconnect();
     res.end(JSON.stringify(users));
   } catch (error) {
     console.error(error);
