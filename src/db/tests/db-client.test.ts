@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MongoClient, ObjectId } from "mongodb";
 import { MongoDBClient } from "../db-client";
 import { User } from "../../api/types";
@@ -20,6 +19,7 @@ describe("MongoDBClient", () => {
   };
 
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (MongoClient as any).mockImplementation(() => ({
       connect: jest.fn(),
       close: jest.fn(),
@@ -35,21 +35,21 @@ describe("MongoDBClient", () => {
     jest.clearAllMocks();
   });
 
-  it("Connect to the database", async () => {
+  it("Connect to the Database", async () => {
     await client.connect();
     expect(client.db).toBeDefined();
   });
 
-  it("Throw an error if not connected to the database", async () => {
+  it("Throw an Error if Not Connected to the Database", async () => {
     await expect(client.getUsers()).rejects.toThrow("Not connected to db");
   });
 
-  describe("Users collection", () => {
+  describe("Users Collection", () => {
     beforeEach(async () => {
       await client.connect();
     });
 
-    it("Get all users", async () => {
+    it("Get All Users", async () => {
       const users: User[] = [{ _id: new ObjectId(), login: "test", password: "test" }] as unknown as User[];
       mockDb.toArray.mockResolvedValue(users);
 
@@ -57,7 +57,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(users);
     });
 
-    it("Get a user by id", async () => {
+    it("Get a User by Id", async () => {
       const user: User = { _id: new ObjectId(), login: "test", password: "test" } as unknown as User;
       mockDb.findOne.mockResolvedValue(user);
 
@@ -65,7 +65,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(user);
     });
 
-    it("Get a user by login", async () => {
+    it("Get a User by Login", async () => {
       const user: User = { _id: new ObjectId(), login: "test", password: "test" } as unknown as User;
       mockDb.findOne.mockResolvedValue(user);
 
@@ -73,7 +73,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(user);
     });
 
-    it("Add a user", async () => {
+    it("Add a User", async () => {
       const user: User = { _id: new ObjectId(), login: "test", password: "test" } as unknown as User;
       mockDb.insertOne.mockResolvedValue({ insertedId: user._id });
 
@@ -81,7 +81,7 @@ describe("MongoDBClient", () => {
       expect(result.insertedId).toEqual(user._id);
     });
 
-    it("Delete a user", async () => {
+    it("Delete a User", async () => {
       const userId = new ObjectId();
       mockDb.deleteOne.mockResolvedValue({ deletedCount: 1 });
 
@@ -89,7 +89,7 @@ describe("MongoDBClient", () => {
       expect(result.deletedCount).toEqual(1);
     });
 
-    it("Update a user", async () => {
+    it("Update a User", async () => {
       const user: User = { _id: new ObjectId(), login: "test", password: "test" } as unknown as User;
       mockDb.updateOne.mockResolvedValue({ modifiedCount: 1 });
 
@@ -98,12 +98,12 @@ describe("MongoDBClient", () => {
     });
   });
 
-  describe("Movies collection", () => {
+  describe("Movies Collection", () => {
     beforeEach(async () => {
       await client.connect();
     });
 
-    it("Get all movies", async () => {
+    it("Get All Movies", async () => {
       const movies: DbMovie[] = [{ _id: new ObjectId(), title: "test movie", year: "2021" }] as unknown as DbMovie[];
       mockDb.toArray.mockResolvedValue(movies);
 
@@ -111,7 +111,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(movies);
     });
 
-    it("Get movie titles", async () => {
+    it("Get Movie Titles", async () => {
       const titles = [{ _id: new ObjectId(), title: "test movie" }];
       mockDb.toArray.mockResolvedValue(titles);
 
@@ -119,7 +119,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(titles);
     });
 
-    it("Get a movie by id", async () => {
+    it("Get a Movie by Id", async () => {
       const movie: DbMovie = { _id: new ObjectId(), title: "test movie", year: "2021" } as unknown as DbMovie;
       mockDb.findOne.mockResolvedValue(movie);
 
@@ -127,7 +127,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(movie);
     });
 
-    it("Get a movie by title", async () => {
+    it("Get a Movie by Title", async () => {
       const movie: DbMovie = { _id: new ObjectId(), title: "test movie", year: "2021" } as unknown as DbMovie;
       mockDb.findOne.mockResolvedValue(movie);
 
@@ -135,7 +135,7 @@ describe("MongoDBClient", () => {
       expect(result).toEqual(movie);
     });
 
-    it("Add a movie", async () => {
+    it("Add a Movie", async () => {
       const movie: DbMovie = { _id: new ObjectId(), title: "test movie", year: "2021" } as unknown as DbMovie;
       mockDb.insertOne.mockResolvedValue({ insertedId: movie._id });
 
@@ -143,7 +143,7 @@ describe("MongoDBClient", () => {
       expect(result.insertedId).toEqual(movie._id);
     });
 
-    it("Update a movie", async () => {
+    it("Update a Movie", async () => {
       const movie: DbMovie = { _id: new ObjectId(), title: "test movie", year: "2021" } as unknown as DbMovie;
       mockDb.updateOne.mockResolvedValue({ modifiedCount: 1 });
 
@@ -151,12 +151,38 @@ describe("MongoDBClient", () => {
       expect(result.modifiedCount).toEqual(1);
     });
 
-    it("Delete a movie", async () => {
+    it("Delete a Movie", async () => {
       const movieId = new ObjectId();
       mockDb.deleteOne.mockResolvedValue({ deletedCount: 1 });
 
       const result = await client.deleteMovie(movieId.toHexString());
       expect(result.deletedCount).toEqual(1);
+    });
+  });
+
+  describe("Disconnect", () => {
+    it("Should Close the Database Connection", async () => {
+      await client.connect();
+      await client.disconnect();
+      expect(client.client.close).toHaveBeenCalled();
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("Should Throw an Error if Not Connected to the Database", async () => {
+      await expect(client.getUsers()).rejects.toThrow("Not connected to db");
+      await expect(client.getUserById("some-id")).rejects.toThrow("Not connected to db");
+      await expect(client.getUserByLogin("login")).rejects.toThrow("Not connected to db");
+      await expect(client.addUser({} as User)).rejects.toThrow("Not connected to db");
+      await expect(client.deleteUser("some-id")).rejects.toThrow("Not connected to db");
+      await expect(client.updateUser("some-id", {} as User)).rejects.toThrow("Not connected to db");
+      await expect(client.getMovies()).rejects.toThrow("Not connected to db");
+      await expect(client.getTitles()).rejects.toThrow("Not connected to db");
+      await expect(client.getMovieById("some-id")).rejects.toThrow("Not connected to db");
+      await expect(client.getMovieByTitle("title")).rejects.toThrow("Not connected to db");
+      await expect(client.addMovie({} as DbMovie)).rejects.toThrow("Not connected to db");
+      await expect(client.updateMovie("some-id", {} as DbMovie)).rejects.toThrow("Not connected to db");
+      await expect(client.deleteMovie("some-id")).rejects.toThrow("Not connected to db");
     });
   });
 });
