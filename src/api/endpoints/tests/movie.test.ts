@@ -26,7 +26,7 @@ describe('getMovie', () => {
     jest.clearAllMocks();
   });
 
-  it('should return 400 if title is not provided', async () => {
+  it('Returns 400 if title is not provided', async () => {
     req.url = '/api/movie';
 
     await getMovie(req, res);
@@ -35,7 +35,7 @@ describe('getMovie', () => {
     expect(res.end).toHaveBeenCalledWith('title is required');
   });
 
-  it('should return movie from db if found', async () => {
+  it('Returns movie from db if found', async () => {
     req.url = '/api/movie?title=Inception';
     const movie = { title: 'Inception' };
     (MongoDBClient.prototype.connect as jest.Mock).mockResolvedValue(undefined);
@@ -50,7 +50,7 @@ describe('getMovie', () => {
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(movie));
   });
 
-  it('should fetch movie from OMDB and add to db if not found in db', async () => {
+  it('Fetches movie from OMDB and adds to db if not found in db', async () => {
     req.url = '/api/movie?title=Inception';
     const omdbMovie = { Title: 'Inception' };
     const formattedMovie = { title: 'Inception' };
@@ -72,7 +72,7 @@ describe('getMovie', () => {
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(formattedMovie));
   });
 
-  it('should return 500 if an error occurs', async () => {
+  it('Returns 500 if an error occurs', async () => {
     req.url = '/api/movie?title=Inception';
     (MongoDBClient.prototype.connect as jest.Mock).mockRejectedValue(new Error('DB error'));
 
