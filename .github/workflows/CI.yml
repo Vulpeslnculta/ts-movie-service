@@ -48,11 +48,11 @@ jobs:
 
       - name: Run test coverage
         run: npm run coverage
-
+      
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: ./coverage/*.json
+          files: ./coverage/*.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
