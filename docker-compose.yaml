@@ -27,7 +27,7 @@ services:
       - "3030:3030"
     environment:
       - PORT=3030
-      - MONGO_DB_URI=mongodb+srv://nikodem:vd3QiZ1VZx9s7Hau@movie-service.ypgwz.mongodb.net/?retryWrites=true&w=majority&appName=movie-service;
+      - MONGO_DB_URI=${MONGO_DB_URI};
       - OMDB_API_KEY=${OMDB_API_KEY}
       - OMDB_API_URL=http://www.omdbapi.com
       - JWT_SECRET=${JWT_SECRET}
